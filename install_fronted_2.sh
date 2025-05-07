@@ -6,32 +6,46 @@ set -x
 # Variables de configuración 
 #----------------------------------------------------
 # Configuramos 
-IP_MYSQL=172.31.83.131
+IP_MYSQL=172.31.89.112 
 
+EMAIL_HTPPS=f.s.p282002@gamil.com
+DOMAIN=fspcorp.ddns.net
 #----------------------------------------------------
 
 #----------------------------------------------------
-# Instalacíon de la pila LEMP (Solución 1: Unix en la misma máquina)
+# Instalacíon de la pila LAMP
 #----------------------------------------------------
 # Actualizamos el sistema
 apt update
-# apt upgrade -y
+apt upgrade -y
 
-# Instalamos El servidor NGINX
-apt install nginx -y
+# Instalamos El Apache2
+apt install apache2 -y
+ 
 
-# Instalamos el php-fpm y php-mysql
-apt install php-fpm -y
-apt install php-mysql -y
+# Instalamos php-mysql
+apt install php libapache2-mod-php php-mysql -y
 
-
-# Configuración de Nginx
-cp conf/default_socket_unix /etc/nginx/sites-available/default
-systemctl restart nginx
+# Reiniciamos el servidor apache2
+systemctl restart apache2
 
 
-# Comprobacion
-cp conf/info.php /var/www/html/
+
+#----------------------------------------------------
+# Instalacíon de herramientas adicionales 
+#----------------------------------------------------
+# Herramienta: Adminer
+cd /var/www/html
+mkdir adminer
+cd adminer
+wget https://github.com/vrana/adminer/releases/download/v4.8.1/adminer-4.8.1-mysql.php
+mv adminer-4.8.1-mysql.php index.php
+
+# Actualizamos el propietario y el grupo del directorio /var/www/html
+chown www-data:www-data /var/www/html -R 
+
+
+
 
 #--------------------------------------
 # Despliege de la aplicacion web
@@ -63,3 +77,21 @@ chown www-data:www-data /var/www/html -R
 #Cambiamos el nombre de la Homepage
 
 sed -i "s/Simple LAMP web app/Simple LAMP web app Fronted Nº2/" /var/www/html/index.php
+
+#----------------------------------------
+# Configuramos HTPPS
+#----------------------------------------
+
+
+# Realizams la instalacion de snapd
+#snap install core
+#snap refresh core
+
+# Eliminamos instalaciones previas de certbot con apt
+# apt-get remove certbot
+
+# Instalamos certbot con snap
+# snap install --classic certbot
+
+# Solicitamos el certificado HTTPS
+# sudo certbot --apache -m $EMAIL_HTPPS --agree-tos --no-eff-email -d $DOMAIN
